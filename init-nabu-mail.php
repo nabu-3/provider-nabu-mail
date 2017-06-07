@@ -21,13 +21,13 @@ use providers\nabu\mail\CNabuMailProviderManager;
 
 /**
  * @author Rafael Gutierrez <rgutierrez@nabu-3.com>
- * @since 0.0.1
- * @version 0.0.1
+ * @since 3.0.0
+ * @version 3.0.0
  * @package \providers\phpmailer\phpmailer
  */
 
-define ('NABU_MAIL_VENDOR_KEY', 'NabuMail');
-define ('NABU_MAIL_MODULE_KEY', 'NabuMail');
+define ('NABU_MAIL_VENDOR_KEY', 'nabu');
+define ('NABU_MAIL_MODULE_KEY', 'mail');
 define ('NABU_MAIL_MANAGER_KEY', 'CNabuMailProviderManager');
 define ('NABU_MAIL_PROVIDER_PATH', dirname(__FILE__));
 

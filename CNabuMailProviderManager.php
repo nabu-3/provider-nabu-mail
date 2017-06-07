@@ -20,8 +20,7 @@
 namespace providers\nabu\mail;
 use nabu\core\CNabuEngine;
 use nabu\core\interfaces\INabuApplication;
-use nabu\messaging\CNabuMessagingServiceInterfaceDescriptor;
-use nabu\messaging\CNabuMessagingTemplateRenderInterfaceDescriptor;
+use nabu\messaging\descriptors\CNabuMessagingTemplateRenderInterfaceDescriptor;
 use nabu\messaging\adapters\CNabuMessagingModuleManagerAdapter;
 use nabu\messaging\exceptions\ENabuMessagingException;
 

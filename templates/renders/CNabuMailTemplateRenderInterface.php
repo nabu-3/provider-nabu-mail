@@ -19,6 +19,11 @@
 
 namespace providers\nabu\mail\templates\renders;
 use nabu\core\CNabuObject;
+use nabu\core\exceptions\ENabuCoreException;
+use nabu\data\lang\CNabuLanguage;
+use nabu\data\messaging\CNabuMessagingTemplate;
+use nabu\data\messaging\CNabuMessagingTemplateLanguage;
+use nabu\messaging\exceptions\ENabuMessagingException;
 use nabu\messaging\interfaces\INabuMessagingTemplateRenderInterface;
 use providers\nabu\mail\CNabuMailProviderManager;
 
@@ -33,6 +38,10 @@ class CNabuMailTemplateRenderInterface extends CNabuObject implements INabuMessa
 {
     /** @var CNabuMailProviderManager Manager instance associated with this interface. */
     private $nabu_mail_manager = null;
+    /** @var CNabuMessagingTemplate Template instance to render contents.*/
+    private $nb_messaging_template = null;
+    /** @var CNabuLanguage Language instance to render contents. */
+    private $nb_language = null;
 
     /**
      * Default constructor.
@@ -50,5 +59,54 @@ class CNabuMailTemplateRenderInterface extends CNabuObject implements INabuMessa
 
     public function finish()
     {
+    }
+
+    public function setTemplate(CNabuMessagingTemplate $nb_messaging_template): INabuMessagingTemplateRenderInterface
+    {
+        $this->nb_messaging_template = $nb_messaging_template;
+
+        return $this;
+    }
+
+    public function setLanguage(CNabuLanguage $nb_language) : INabuMessagingTemplateRenderInterface
+    {
+        $this->nb_language = $nb_language;
+
+        return $this;
+    }
+
+    public function createSubject(array $params): string
+    {
+        if ($this->nb_messaging_template instanceof CNabuMessagingTemplate) {
+            if ($this->nb_language instanceof CNabuLanguage &&
+                ($nb_translation = $this->nb_messaging_template->getTranslation($this->nb_language)) instanceof CNabuMessagingTemplateLanguage
+            ) {
+                return $this->applyTemplate($nb_translation->getSubject());
+            } else {
+                throw new ENabuCoreException(ENabuCoreException::ERROR_LANGUAGE_REQUIRED);
+            }
+        } else {
+            throw new ENabuMessagingException(ENabuMessagingException::ERROR_TEMPLATE_REQUIRED);
+        }
+    }
+
+    public function createBody(array $params): string
+    {
+        if ($this->nb_messaging_template instanceof CNabuMessagingTemplate) {
+            if ($this->nb_language instanceof CNabuLanguage &&
+                ($nb_translation = $this->nb_messaging_template->getTranslation($this->nb_language)) instanceof CNabuMessagingTemplateLanguage
+            ) {
+                return $this->applyTemplate($nb_translation->getHTML());
+            } else {
+                throw new ENabuCoreException(ENabuCoreException::ERROR_LANGUAGE_REQUIRED);
+            }
+        } else {
+            throw new ENabuMessagingException(ENabuMessagingException::ERROR_TEMPLATE_REQUIRED);
+        }
+    }
+
+    private function applyTemplate(string $pattern, array $params)
+    {
+        return $pattern;
     }
 }

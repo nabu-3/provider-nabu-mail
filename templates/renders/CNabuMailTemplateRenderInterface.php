@@ -75,13 +75,13 @@ class CNabuMailTemplateRenderInterface extends CNabuObject implements INabuMessa
         return $this;
     }
 
-    public function createSubject(array $params): string
+    public function createSubject(array $params = null) : string
     {
         if ($this->nb_messaging_template instanceof CNabuMessagingTemplate) {
             if ($this->nb_language instanceof CNabuLanguage &&
                 ($nb_translation = $this->nb_messaging_template->getTranslation($this->nb_language)) instanceof CNabuMessagingTemplateLanguage
             ) {
-                return $this->applyTemplate($nb_translation->getSubject());
+                return $this->applyTemplate($nb_translation->getSubject(), $params);
             } else {
                 throw new ENabuCoreException(ENabuCoreException::ERROR_LANGUAGE_REQUIRED);
             }
@@ -90,13 +90,13 @@ class CNabuMailTemplateRenderInterface extends CNabuObject implements INabuMessa
         }
     }
 
-    public function createBody(array $params): string
+    public function createBody(array $params = null) : string
     {
         if ($this->nb_messaging_template instanceof CNabuMessagingTemplate) {
             if ($this->nb_language instanceof CNabuLanguage &&
                 ($nb_translation = $this->nb_messaging_template->getTranslation($this->nb_language)) instanceof CNabuMessagingTemplateLanguage
             ) {
-                return $this->applyTemplate($nb_translation->getHTML());
+                return $this->applyTemplate($nb_translation->getHTML(), $params);
             } else {
                 throw new ENabuCoreException(ENabuCoreException::ERROR_LANGUAGE_REQUIRED);
             }
@@ -105,8 +105,31 @@ class CNabuMailTemplateRenderInterface extends CNabuObject implements INabuMessa
         }
     }
 
-    private function applyTemplate(string $pattern, array $params)
+    /**
+     * Applies a pattern with a set of optional parameters replacing macros for their values.
+     * @param string $pattern Pattern string to be applied.
+     * @param array|null $params Optional parameters to use inside the pattern.
+     * @return string Returns the formed string after combine pattern and params.
+     */
+    private function applyTemplate(string $pattern, array $params = null)
     {
-        return $pattern;
+        $retval = $pattern;
+
+        if (count($params) > 0) {
+            $regexpr = '/(\$\$[a-zA-Z][a-zA-Z0-9_]*\$\$)/';
+            $macros = preg_grep($regexpr, preg_split($regexpr, $pattern, 0, PREG_SPLIT_DELIM_CAPTURE));
+            if (count($macros) > 0) {
+                array_walk($macros, function(&$item, $key) {
+                    $item = substr($item, 2, strlen($item) - 4);
+                });
+                $macros = array_intersect(array_unique($macros), array_keys($params));
+                foreach ($macros as $macro) {
+                    $value = $params[$macro];
+                    $retval = str_replace("\$\$$macro\$\$", $value, $retval);
+                }
+            }
+        }
+
+        return $retval;
     }
 }

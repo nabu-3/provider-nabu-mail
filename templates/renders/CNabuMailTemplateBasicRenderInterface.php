@@ -34,7 +34,7 @@ use providers\nabu\mail\CNabuMailProviderManager;
  * @version 3.0.0
  * @package \providers\nabu\mail\templates\renders
  */
-class CNabuMailTemplateRenderInterface extends CNabuObject implements INabuMessagingTemplateRenderInterface
+class CNabuMailTemplateBasicRenderInterface extends CNabuObject implements INabuMessagingTemplateRenderInterface
 {
     /** @var CNabuMailProviderManager Manager instance associated with this interface. */
     private $nabu_mail_manager = null;
@@ -90,13 +90,28 @@ class CNabuMailTemplateRenderInterface extends CNabuObject implements INabuMessa
         }
     }
 
-    public function createBody(array $params = null) : string
+    public function createBodyHTML(array $params = null) : string
     {
         if ($this->nb_messaging_template instanceof CNabuMessagingTemplate) {
             if ($this->nb_language instanceof CNabuLanguage &&
                 ($nb_translation = $this->nb_messaging_template->getTranslation($this->nb_language)) instanceof CNabuMessagingTemplateLanguage
             ) {
-                return $this->applyTemplate($nb_translation->getHTML(), $params);
+                return is_string($html = $nb_translation->getHTML()) ? $this->applyTemplate($html, $params) : '';
+            } else {
+                throw new ENabuCoreException(ENabuCoreException::ERROR_LANGUAGE_REQUIRED);
+            }
+        } else {
+            throw new ENabuMessagingException(ENabuMessagingException::ERROR_TEMPLATE_REQUIRED);
+        }
+    }
+
+    public function createBodyText(array $params = null) : string
+    {
+        if ($this->nb_messaging_template instanceof CNabuMessagingTemplate) {
+            if ($this->nb_language instanceof CNabuLanguage &&
+                ($nb_translation = $this->nb_messaging_template->getTranslation($this->nb_language)) instanceof CNabuMessagingTemplateLanguage
+            ) {
+                return is_string($html = $nb_translation->getText()) ? $this->applyTemplate($html, $params) : '';
             } else {
                 throw new ENabuCoreException(ENabuCoreException::ERROR_LANGUAGE_REQUIRED);
             }
